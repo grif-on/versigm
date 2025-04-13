@@ -6,6 +6,15 @@ function scriptOptions() {
 	# Options file to consider having always actual version number
 	$global:master_options_path = "$global:project_directory/options/windows/options_windows.yy"
 	
+	$global:other_options_paths = @(
+		"$global:project_directory/options/linux/options_linux.yy",
+		"$global:project_directory/options/android/options_android.yy",
+		"$global:project_directory/options/mac/options_mac.yy",
+		"$global:project_directory/options/ios/options_ios.yy",
+		"$global:project_directory/options/tvos/options_tvos.yy",
+		"$global:project_directory/options/html5/options_html5.yy"
+	)
+	
 }
 
 
