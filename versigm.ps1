@@ -26,6 +26,14 @@ function tryToGetProjectDirectory() {
 	
 }
 
+function getPlatformNameFromOptionsPath($path) {
+	
+	# e.g. "../options/windows/options_windows.yy" --> "windows"
+	return $path.Split("_")[1].Split(".")[0]
+	
+}
+
+
 #endregion Helper functions
 
 
