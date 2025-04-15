@@ -22,7 +22,25 @@ function scriptOptions() {
 
 function tryToGetProjectDirectory() {
 	
-	return ".." # todo - actually implement , lol
+	$script_directory = $PSScriptRoot
+	$one_directory_back = "$script_directory/.."
+	
+	if (Test-Path -Path "$script_directory/options" -PathType Container) {
+		
+		return $script_directory
+		
+	} elseif (Test-Path -Path "$one_directory_back/options" -PathType Container) {
+		
+		return $one_directory_back
+		
+	} else {
+		
+		$message = "Can't determine path of project directory !"
+		$recomendation = "If you placed script outside project directory (or too deep) , then you need to explicitly point script to a project directory (with `"`$global:project_directory`" variable) ."
+		Write-Error -Message $message -RecommendedAction $recomendation
+		exit
+		
+	}
 	
 }
 
