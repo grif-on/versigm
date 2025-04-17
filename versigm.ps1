@@ -18,7 +18,7 @@ function scriptOptions() {
 }
 
 
-#region Helper functions
+#region Functions
 
 function tryToGetProjectDirectory() {
 	
@@ -47,12 +47,10 @@ function tryToGetProjectDirectory() {
 function getPlatformNameFromOptionsPath([string] $path) {
 	
 	# e.g. "../options/windows/options_windows.yy" --> "windows"
-	return $path.Split("_")[1].Split(".")[0]
-	
+	return $path.Split("_")[1].Split(".")[-2]
 }
 
-
-#endregion Helper functions
+#endregion Functions
 
 
 scriptOptions
