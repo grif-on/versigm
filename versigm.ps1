@@ -131,7 +131,7 @@ function getVersion([string] $options_path) {
 			$version += "." + "0"
 			
 		}
-		# Apple's does have revision field in IDE , but for them version again stored in format "major.minor.patch" + revision in it's own option
+		# Apple's have revision as sepparated field in IDE , and again for them version stored in format "major.minor.patch" + revision in it's own option
 		elseif ($platform -eq "mac" -or $platform -eq "ios" -or $platform -eq "tvos") {
 			
 			$revision_index = findIndexThatContains -where $options -what_to_find "option_$platform`_build_number" -stop_when_nothing_found
