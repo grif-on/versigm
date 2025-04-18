@@ -6,7 +6,7 @@ function scriptOptions() {
 	# Options file to consider having always actual version number
 	$global:master_options_path = "$global:project_directory/options/windows/options_windows.yy"
 	
-	$global:other_options_paths = @(
+	$global:managed_options_paths = @(
 		"$global:project_directory/options/linux/options_linux.yy",
 		"$global:project_directory/options/android/options_android.yy",
 		"$global:project_directory/options/mac/options_mac.yy",
@@ -166,7 +166,7 @@ $master_os = getPlatformNameFromOptionsPath -path $global:master_options_path
 # testing
 Write-Host "$master_os - $(getVersion -options_path $global:master_options_path)"
 
-foreach ($options_path in $global:other_options_paths) {
+foreach ($options_path in $global:managed_options_paths) {
 	
 	$platform = getPlatformNameFromOptionsPath -path $options_path
 	
