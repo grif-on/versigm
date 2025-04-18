@@ -48,6 +48,23 @@ function getPlatformNameFromOptionsPath([string] $path) {
 	
 	# e.g. "../options/windows/options_windows.yy" --> "windows"
 	return $path.Split("_")[1].Split(".")[-2]
+	
+}
+
+function findIndexThatContains([string[]] $where, [string] $what_to_find) {
+	
+	$l = $where.Count - 1
+	
+	for (; $l -gt 0; $l--) {
+		
+		if ($where[$l].Contains($what_to_find)) {
+			break
+		}
+		
+	}
+	
+	return $l
+	
 }
 
 #endregion Functions
