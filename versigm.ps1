@@ -80,14 +80,31 @@ function getPlatformNameFromOptionsPath([string] $path) {
 	
 }
 
-function findIndexThatContains([string[]] $where, [string] $what_to_find) {
+function findIndexThatContains([string[]] $where, [string] $what_to_find, [switch] $stop_when_nothing_found) {
 	
 	$l = $where.Count - 1
 	
-	for (; $l -gt 0; $l--) {
+	while ($l -ge 0) {
 		
 		if ($where[$l].Contains($what_to_find)) {
 			break
+		}
+		
+		$l--
+		
+	}
+	
+	if ($l -le -1) {
+		
+		if ($stop_when_nothing_found) {
+			
+			Write-Error -Message "Can't find index !"
+			exit
+			
+		} else {
+			
+			$l = $null
+		
 		}
 		
 	}
@@ -104,7 +121,7 @@ function getVersion([string] $options_path) {
 		
 		$options = Get-Content -Path $options_path
 		
-		$version_index = findIndexThatContains -where $options -what_to_find "option_$platform`_version"
+		$version_index = findIndexThatContains -where $options -what_to_find "option_$platform`_version" -stop_when_nothing_found
 		
 		$version = $options[$version_index].Split("`"")[3]
 		
@@ -117,7 +134,7 @@ function getVersion([string] $options_path) {
 		# Apple's does have revision field in IDE , but for them version again stored in format "major.minor.patch" + revision in it's own option
 		elseif ($platform -eq "mac" -or $platform -eq "ios" -or $platform -eq "tvos") {
 			
-			$revision_index = findIndexThatContains -where $options -what_to_find "option_$platform`_build_number"
+			$revision_index = findIndexThatContains -where $options -what_to_find "option_$platform`_build_number" -stop_when_nothing_found
 			
 			$version += "." + $options[$revision_index].Split("`"")[2].Replace(":", "").Replace(",", "")
 			
