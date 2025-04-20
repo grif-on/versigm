@@ -150,6 +150,60 @@ function getVersion([string] $options_path) {
 	
 }
 
+function setVersion([string] $options_path, [Version] $version) {
+	
+	$platform = getPlatformNameFromOptionsPath -path $options_path
+	
+	$version_string = $version.ToString()
+	$revision_string = ""
+	
+	# Android and linux doesn't have revision field in IDE , and for them version stored in format "major.minor.patch"
+	if ($platform -eq "android" -or $platform -eq "linux") {
+			
+		$version_string = "$($version.major).$($version.minor).$($version.patch)"
+	
+	}
+	# Apple's have revision as sepparated field in IDE , and again for them version stored in format "major.minor.patch" + revision in it's own option
+	elseif ($platform -eq "mac" -or $platform -eq "ios" -or $platform -eq "tvos") {
+				
+		$version_string = "$($version.major).$($version.minor).$($version.patch)"
+		$revision_string = $version.revision
+		
+	}
+	
+	function writeVersion([string] $options_path, [string] $version, [string] $revision) {
+		
+		$platform = getPlatformNameFromOptionsPath -path $options_path
+		
+		$options = Get-Content -Path $options_path
+		
+		$version_index = findIndexThatContains -where $options -what_to_find "option_$platform`_version" -stop_when_nothing_found
+		
+		$version_line = $options[$version_index].Split("`"")
+		$version_line[3] = $version
+		$options[$version_index] = $version_line -join "`""
+		
+		if ($revision -ne "") {
+			
+			$revision_index = findIndexThatContains -where $options -what_to_find "option_$platform`_build_number" -stop_when_nothing_found
+			
+			$revision_line = $options[$revision_index].Split("`"")
+			$revision_line[2] = $revision_line[2].Replace(":", "").Replace(",", "")
+			$revision_line[2] = ":$revision,"
+			$options[$revision_index] = $revision_line -join "`""
+			
+		}
+		
+		$options_string = $options -join "`n"
+		
+		Set-Content -NoNewline -Path $options_path -Value $options_string
+		
+	}
+	
+	writeVersion -options_path $options_path -version $version_string -revision $revision_string
+	
+}
+
 #endregion Functions
 
 
@@ -161,12 +215,18 @@ scriptOptions
 # Note
 # ConvertFrom-Json/ConvertTo-Json are simplier to use but they have different json formating comparing to gamemaker
 
+# testing
+
+$testing_version = New-Object -TypeName Version -ArgumentList @("9.8.7.6")
+
 $master_os = getPlatformNameFromOptionsPath -path $global:master_options_path
 
-# testing
+setVersion -options_path $global:master_options_path -version $testing_version
 Write-Host "$master_os - $(getVersion -options_path $global:master_options_path)"
 
 foreach ($options_path in $global:managed_options_paths) {
+	
+	setVersion -options_path $options_path -version $testing_version
 	
 	$platform = getPlatformNameFromOptionsPath -path $options_path
 	
@@ -175,15 +235,5 @@ foreach ($options_path in $global:managed_options_paths) {
 	Write-Host "$platform - $version"
 	
 }
-
-$options = Get-Content -Path $global:master_options_path
-
-$version_line = $options[31].Split("`"")
-$version_line[3] = "9"
-$options[31] = $version_line -join "`""
-
-$options_string = $options -join "`n"
-
-Set-Content -NoNewline -Path $global:master_options_path -Value $options_string
 
 #endregion Main script part
