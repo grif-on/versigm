@@ -113,6 +113,28 @@ function findIndexThatContains([string[]] $where, [string] $what_to_find, [switc
 	
 }
 
+function readHostWithEditableDefault([string]$prompt, [string] $default_value) {
+	
+	# More about this abominable workaround - https://stackoverflow.com/questions/23619510/
+	# This workaround have one major flaw - default value sends in to foreground window that has focus (and not in to console input buffer directly) .
+	# I.e. you need to be sure that user have script window selected for default value to work .
+	
+	$js_code = 'WScript.CreateObject("WScript.Shell").SendKeys(WScript.Arguments(0));'
+	
+	$temp_js_file = [System.IO.Path]::GetTempFileName() + ".js"
+	Set-Content -Path $temp_js_file -Value $js_code
+	
+	# Start asynchronous JScript which will fill Read-Host input with default value (again , if console window is in focus)
+	cscript.exe //nologo //E:JScript $temp_js_file $default_value
+	
+	$result = Read-Host -Prompt $prompt
+	
+	Remove-Item $temp_js_file
+	
+	return $result
+	
+}
+
 function getVersion([string] $options_path) {
 	
 	function extractVersion([string] $options_path) {
@@ -218,6 +240,14 @@ scriptOptions
 # testing
 
 $testing_version = New-Object -TypeName Version -ArgumentList @("9.8.7.6")
+
+if ([System.Environment]::OSVersion.Platform -eq "Win32NT") {
+	$result = readHostWithEditableDefault -prompt "why the hell there is no built-in way to do this" -default_value "because fuck you"
+	Write-Host "You answered - `"$result`""
+} else {
+	$result = Read-Host -Prompt "bla bla bla (default value)"
+	Write-Host "You manually typed - `"$result`""
+}
 
 $master_os = getPlatformNameFromOptionsPath -path $global:master_options_path
 
