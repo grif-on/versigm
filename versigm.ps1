@@ -113,7 +113,7 @@ function findIndexThatContains([string[]] $where, [string] $what_to_find, [switc
 	
 }
 
-function readHostWithEditableDefault([string]$prompt, [string] $default_value) {
+function readHostWithEditableDefault([string] $prompt, [string] $default_value) {
 	
 	# More about this abominable workaround - https://stackoverflow.com/questions/23619510/
 	# This workaround have one major flaw - default value sends in to foreground window that has focus (and not in to console input buffer directly) .
@@ -121,10 +121,11 @@ function readHostWithEditableDefault([string]$prompt, [string] $default_value) {
 	
 	$js_code = 'WScript.CreateObject("WScript.Shell").SendKeys(WScript.Arguments(0));'
 	
+	# cscript.exe is hardcoded to work only with .js files (i.e. no string execution sadly)
 	$temp_js_file = [System.IO.Path]::GetTempFileName() + ".js"
 	Set-Content -Path $temp_js_file -Value $js_code
 	
-	# Start asynchronous JScript which will fill Read-Host input with default value (again , if console window is in focus)
+	# Start asynchronous JScript which will fill Read-Host input with default value (again , this will work as intended only if console window is in focus)
 	cscript.exe //nologo //E:JScript $temp_js_file $default_value
 	
 	$result = Read-Host -Prompt $prompt
