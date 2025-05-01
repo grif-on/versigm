@@ -1,6 +1,9 @@
-function scriptOptions() {
+#region Script options
+
+# Tweak them to fit the needs of your project
+function applyScriptOptions() {
 	
-	# Replace tryToGetProjectDirectory with regullar path if script placed not inside project folder
+	# If script fails to execute "tryToGetProjectDirectory" function - replace it with string that points to directory with .yyp project file (remember that you can use relative path)
 	$global:project_directory = tryToGetProjectDirectory
 	
 	# Options file to consider having always actual version number
@@ -16,6 +19,8 @@ function scriptOptions() {
 	)
 	
 }
+
+#endregion
 
 
 #region Classes
@@ -230,7 +235,9 @@ function setVersion([string] $options_path, [Version] $version) {
 #endregion Functions
 
 
-scriptOptions
+# Apply options AFTER functions definitions and BEFORE main script body
+# (powershell doesn't have "forward declaration" , so i achieved a simmilar effect with "deferred execution")
+applyScriptOptions
 
 
 #region Main script part
