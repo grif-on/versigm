@@ -1,3 +1,15 @@
+#region Arguments
+
+# Optional arguments to use script in other ways (rather than default interactive version set)
+param (
+	[string]$SetVersion, # if present it value will be used instead of interactive prompt result
+	[switch]$GetVersion, # if present version will not be set , all the script will do is return version
+	[switch]$VersionAsString # if present returned version will be converted to string
+)
+
+#endregion Arguments
+
+
 #region Script options
 
 # Tweak them to fit the needs of your project
