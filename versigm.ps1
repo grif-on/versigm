@@ -257,6 +257,16 @@ applyScriptOptions
 # Note
 # ConvertFrom-Json/ConvertTo-Json are simplier to use but they have different json formating comparing to gamemaker
 
+if ($GetVersion) {
+	
+	if ($VersionAsString) {
+		return (getVersion -options_path $global:master_options_path).ToString()
+	}
+	
+	return getVersion -options_path $global:master_options_path
+	
+}
+
 # testing
 
 $testing_version = New-Object -TypeName Version -ArgumentList @("9.8.7.6")
