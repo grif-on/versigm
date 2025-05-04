@@ -48,10 +48,15 @@ class Version {
 		
 		$version_splitted = $version_string.Split(".")
 		
-		$this.major = [int] $version_splitted[0]
-		$this.minor = [int] $version_splitted[1]
-		$this.patch = [int] $version_splitted[2]
-		$this.revision = [int] $version_splitted[3]
+		try {
+			$this.major = [int] $version_splitted[0]
+			$this.minor = [int] $version_splitted[1]
+			$this.patch = [int] $version_splitted[2]
+			$this.revision = [int] $version_splitted[3]
+		} catch {
+			Write-Error -Message "Failed to convert `"$version_string`" string in to Version object !"
+			exit
+		}
 		
 	}
 	[string] ToString() {
@@ -284,16 +289,29 @@ if ($GetVersion) {
 	
 }
 
-# testing
+$curent_version = getVersion -options_path $global:master_options_path
 
-<#
+$prompt = "Current version is `"$curent_version`" . What will be a new one ?"
+$result = ""
+
 if ([System.Environment]::OSVersion.Platform -eq "Win32NT") {
-	$result = readHostWithEditableDefault -prompt "why the hell there is no built-in way to do this" -default_value "because fuck you"
-	Write-Host "You answered - `"$result`""
+	$result = readHostWithEditableDefault -prompt $prompt -default_value "$curent_version"
 } else {
-	$result = Read-Host -Prompt "bla bla bla (default value)"
-	Write-Host "You manually typed - `"$result`""
+	$result = Read-Host -Prompt $prompt
 }
-#>
+
+if ($result -eq "") {
+	Write-Error -Message "Canceled due to empty prompt result"
+	exit
+}
+
+$new_version = New-Object -TypeName Version -ArgumentList @($result)
+
+if ($new_version -eq $null) {
+	Write-Error -Message "User supplied version are invalid !"
+	exit
+}
+
+setVersionForAllOptions -version $new_version
 
 #endregion Main script part
