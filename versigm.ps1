@@ -2,8 +2,9 @@
 
 # Optional arguments to use script in other ways (rather than default interactive version set)
 param (
+	# note - SetVersion and GetVersion are mutually exclusive (i.e. use only one per script call)
 	[string]$SetVersion, # if present it value will be used instead of interactive prompt result
-	[switch]$GetVersion, # if present version will not be set , all the script will do is return version
+	[switch]$GetVersion, # if present version will not be set , instead the script will just return version
 	[switch]$VersionAsString # if present returned version will be converted to string
 )
 
@@ -244,6 +245,18 @@ function setVersion([string] $options_path, [Version] $version) {
 	
 }
 
+function setVersionForAllOptions([Version] $version) {
+	
+	setVersion -options_path $global:master_options_path -version $version
+	
+	foreach ($options_path in $global:managed_options_paths) {
+		
+		setVersion -options_path $options_path -version $version
+		
+	}
+	
+}
+
 #endregion Functions
 
 
@@ -265,12 +278,15 @@ if ($GetVersion) {
 	
 	return getVersion -options_path $global:master_options_path
 	
+} elseif ($SetVersion -ne "") {
+	
+	setVersionForAllOptions -version (New-Object -TypeName Version -ArgumentList @($SetVersion))
+	
 }
 
 # testing
 
-$testing_version = New-Object -TypeName Version -ArgumentList @("9.8.7.6")
-
+<#
 if ([System.Environment]::OSVersion.Platform -eq "Win32NT") {
 	$result = readHostWithEditableDefault -prompt "why the hell there is no built-in way to do this" -default_value "because fuck you"
 	Write-Host "You answered - `"$result`""
@@ -278,22 +294,6 @@ if ([System.Environment]::OSVersion.Platform -eq "Win32NT") {
 	$result = Read-Host -Prompt "bla bla bla (default value)"
 	Write-Host "You manually typed - `"$result`""
 }
-
-$master_os = getPlatformNameFromOptionsPath -path $global:master_options_path
-
-setVersion -options_path $global:master_options_path -version $testing_version
-Write-Host "$master_os - $(getVersion -options_path $global:master_options_path)"
-
-foreach ($options_path in $global:managed_options_paths) {
-	
-	setVersion -options_path $options_path -version $testing_version
-	
-	$platform = getPlatformNameFromOptionsPath -path $options_path
-	
-	$version = getVersion -options_path $options_path
-	
-	Write-Host "$platform - $version"
-	
-}
+#>
 
 #endregion Main script part
