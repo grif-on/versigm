@@ -287,7 +287,9 @@ if ($GetVersion) {
 	
 	setVersionForAllOptions -version (New-Object -TypeName Version -ArgumentList @($SetVersion))
 	
-} else { # interactive mode
+} else {
+	
+	# interactive mode
 
 	$curent_version = getVersion -options_path $global:master_options_path
 
