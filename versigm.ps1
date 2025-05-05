@@ -287,31 +287,33 @@ if ($GetVersion) {
 	
 	setVersionForAllOptions -version (New-Object -TypeName Version -ArgumentList @($SetVersion))
 	
+} else { # interactive mode
+
+	$curent_version = getVersion -options_path $global:master_options_path
+
+	$prompt = "Current version is `"$curent_version`" . What will be a new one ?"
+	$result = ""
+
+	if ([System.Environment]::OSVersion.Platform -eq "Win32NT") {
+		$result = readHostWithEditableDefault -prompt $prompt -default_value "$curent_version"
+	} else {
+		$result = Read-Host -Prompt $prompt
+	}
+
+	if ($result -eq "") {
+		Write-Error -Message "Canceled due to empty prompt result"
+		exit
+	}
+
+	$new_version = New-Object -TypeName Version -ArgumentList @($result)
+
+	if ($new_version -eq $null) {
+		Write-Error -Message "User supplied version are invalid !"
+		exit
+	}
+
+	setVersionForAllOptions -version $new_version
+
 }
-
-$curent_version = getVersion -options_path $global:master_options_path
-
-$prompt = "Current version is `"$curent_version`" . What will be a new one ?"
-$result = ""
-
-if ([System.Environment]::OSVersion.Platform -eq "Win32NT") {
-	$result = readHostWithEditableDefault -prompt $prompt -default_value "$curent_version"
-} else {
-	$result = Read-Host -Prompt $prompt
-}
-
-if ($result -eq "") {
-	Write-Error -Message "Canceled due to empty prompt result"
-	exit
-}
-
-$new_version = New-Object -TypeName Version -ArgumentList @($result)
-
-if ($new_version -eq $null) {
-	Write-Error -Message "User supplied version are invalid !"
-	exit
-}
-
-setVersionForAllOptions -version $new_version
 
 #endregion Main script part
