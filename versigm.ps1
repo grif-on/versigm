@@ -55,6 +55,14 @@ function applyScriptOptions() {
 		"$global:project_directory/options/html5/options_html5.yy"
 	)
 	
+	# GML Script that contains version string for in-game rendering
+	$global:managed_gml_script_path = "$global:project_directory/scripts/scr_version_initialize/scr_version_initialize.gml"
+	
+	# Text that located before and after version text (i.e. text between these two will be replaced when version are set)
+	# Note - ` symbol is a powershell escape symbol (same as \ in C/C++)
+	$global:managed_gml_sript_line_prefix = " `" v"
+	$global:managed_gml_sript_line_suffix = "`" "
+	
 }
 
 #endregion
@@ -283,6 +291,29 @@ function setVersionForAllOptions([Version] $version) {
 		setVersion -options_path $options_path -version $version
 		
 	}
+	
+	setVersionForGmlScript -gml_script_path $global:managed_gml_script_path -version $version
+	
+}
+
+function setVersionForGmlScript([string] $gml_script_path, [Version] $version) {
+	
+	$gml_script_string = Get-Content -Path $gml_script_path -Raw
+	
+	$match = [regex]::Match($gml_script_string, "(.*$global:managed_gml_sript_line_prefix)(.*)($global:managed_gml_sript_line_suffix.*)")
+	if (!$match.Success) {
+		$message = "Can't find version value (regexp search in gml script) !"
+		$recomendation = "Check that your file contains supplied prefix ($global:managed_gml_sript_line_prefix) and suffix ($global:managed_gml_sript_line_suffix) ."
+		Write-Error -Message $message -RecommendedAction $recomendation
+		exit
+	}
+	
+	$old_version_line = $match.Groups[0].Value
+	$short_version = "$($version.major).$($version.minor).$($version.patch)"
+	$new_version_line = $match.Groups[1].Value + $short_version + $match.Groups[3].Value
+	$gml_script_string = $gml_script_string.Replace($old_version_line, $new_version_line)
+	
+	Set-Content -NoNewline -Path $gml_script_path -Value $gml_script_string
 	
 }
 
